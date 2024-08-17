@@ -27,23 +27,55 @@ async function mensajeDeCarga() {
     }
 }
 
+let conteo = 0;  // Variable para contar las solicitudes
+
 async function fetchAsignacion(legajo) {
     try {
+        // Realiza una solicitud GET al servidor usando fetch
         const response = await fetch(`https://api.asignaciones.com.ar/start.php?CP=BK&legajo=${legajo}`);
+        
+        // Verifica si la respuesta es correcta
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        // Convierte la respuesta a texto
         const data = await response.text();
+        
+        // Muestra un mensaje de carga en el elemento con id 'contenido-fetch'
         document.getElementById('contenido-fetch').innerText = await mensajeDeCarga();
+        
+        // Incrementa el contador
         conteo++;
+        
+        // Devuelve los datos obtenidos
         return data;
     } catch (error) {
+        // Captura y muestra errores en caso de que algo salga mal
         console.error('Error al obtener el contenido:', error);
+        document.getElementById('contenido-fetch').innerText = 'Error al obtener los datos';
     }
 }
 
+async function mensajeDeCarga() {
+    return 'Cargando...';  // Mensaje de carga que se muestra mientras se obtienen los datos
+}
+
+async function mostrarAsignaciones() {
+    const legajo = '123';  // Reemplaza esto con el valor de legajo adecuado
+    const datos = await fetchAsignacion(legajo);
+    
+    // Muestra los datos en el elemento con id 'contenido-fetch'
+    document.getElementById('contenido-fetch').innerText = datos;
+}
+
+// Configura el event listener cuando el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', function() {
     const mostrarAsignacionesBtn = document.getElementById('mostrar-asignaciones-btn');
+    
+    // Añade un evento al botón para ejecutar la función mostrarAsignaciones al hacer clic
     mostrarAsignacionesBtn.addEventListener('click', mostrarAsignaciones);
 });
-
 
 function fechaEspecial(fecha) {
     if (fecha == "DOMINGO 09/06") {
