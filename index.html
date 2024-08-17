@@ -7,15 +7,9 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="imagenes/ojo.png">
 </head>
-
-
 <body>
 
     <header class="headder">
-        <!-- <h1 id="marca-nav">Distribuidora del Sur</h1> -->
-        <!--<img src='imagenes/logo.png' alt="logo"  id="logo"> -->
-        <!--<h1 style="color: black; font-family: monospace;">Nuestras Asignaciones</h1> -->
-
         <div aria-label="Orange and tan hamster running in a metal wheel" role="img" class="wheel-and-hamster">
             <div class="wheel"></div>
             <div class="hamster">
@@ -33,48 +27,32 @@
                 <div class="hamster__limb hamster__limb--bl"></div>
                 <div class="hamster__tail"></div>
                 <div class="hamster__stick"></div>
-                <div class="hamster__apple"> <img class="imgWCQ" src="imagenes\WCQ.png"></div>
+                <div class="hamster__apple">
+                  <img class="imgWCQ" src="imagenes/WCQ.png">
+                </div>
               </div>
             </div>
             <div class="spoke"></div>
-          </div>
-          
+        </div>
+    </header>
 
-
-          
-        </header>
-        
-        
-        
-        
-        <!-----------------------CONTENIDO----------------------->
-        <nav id="category-nav">
-          <button onclick="mostrarAsignaciones()">Ver por colaborador</button>
-          <button onclick="mostrarAsignacionesPorDia()">Ver por día</button>
-          <!-- <button onclick="irASolicitarHorario()">Solicitar Horarios</button> --> 
-
-
+    <!-----------------------CONTENIDO----------------------->
+    <nav id="category-nav">
+        <button onclick="mostrarAsignaciones()">Ver por colaborador</button>
+        <button onclick="mostrarAsignacionesPorDia()">Ver por día</button>
+        <!-- <button onclick="irASolicitarHorario()">Solicitar Horarios</button> -->
     </nav>
+
     <div id="contenido-fetch"></div>
     <div id="asignaciones-container"></div>
     <div id="asignaciones-container2"></div>
     <div id="debug-container"></div>
 
-
     <!-------------------------------------------------------->
     <br><br><br>
 
-
-
-
-    <script src="locales_data.js"> </script>
-    <script src="funciones.js"> </script>
-
+    <script src="locales_data.js"></script>
+    <script src="funciones.js"></script>
+    <script src="tu-archivo.js"></script> <!-- Asegúrate de que tu archivo principal esté enlazado aquí -->
 </body>
-
-
-
-
 </html>
-
-
