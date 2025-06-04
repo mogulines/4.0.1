@@ -31,175 +31,58 @@ let conteo = 0;  // Variable para contar las solicitudes
 
 async function fetchAsignacion(legajo) {
     try {
-        // Realiza una solicitud GET al servidor usando fetch
-        const response = await fetch(`https://api.asignaciones.com.ar/start.php?CP=BK&legajo=${legajo}`);
+        // Cambia la URL aquí para usar la nueva API
+        const response = await fetch(`https://api.nueva-asignaciones.com/v1/horarios?legajo=${legajo}`);
         
-        // Verifica si la respuesta es correcta
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         
-        // Convierte la respuesta a texto
         const data = await response.text();
         
-        // Muestra un mensaje de carga en el elemento con id 'contenido-fetch'
         document.getElementById('contenido-fetch').innerText = await mensajeDeCarga();
         
-        // Incrementa el contador
         conteo++;
         
-        // Devuelve los datos obtenidos
         return data;
     } catch (error) {
-        // Captura y muestra errores en caso de que algo salga mal
         console.error('Error al obtener el contenido:', error);
         document.getElementById('contenido-fetch').innerText = 'Error al obtener los datos';
     }
 }
 
-async function mensajeDeCarga() {
-    return 'Cargando...';  // Mensaje de carga que se muestra mientras se obtienen los datos
-}
-
 async function mostrarAsignaciones() {
-    const legajo = '123';  // Reemplaza esto con el valor de legajo adecuado
-    const datos = await fetchAsignacion(legajo);
-    
-    // Muestra los datos en el elemento con id 'contenido-fetch'
-    document.getElementById('contenido-fetch').innerText = datos;
-}
-
-// Configura el event listener cuando el DOM esté completamente cargado
-document.addEventListener('DOMContentLoaded', function() {
-    const mostrarAsignacionesBtn = document.getElementById('mostrar-asignaciones-btn');
-    
-    // Añade un evento al botón para ejecutar la función mostrarAsignaciones al hacer clic
-    mostrarAsignacionesBtn.addEventListener('click', mostrarAsignaciones);
-});
-
-function fechaEspecial(fecha) {
-    if (fecha == "DOMINGO 09/06") {
-        return " (Viene gente de otro local no incluida)"
-    } else if (["LUNES 24/06","MARTES 25/06","MIERCOLES 26/06"].includes(fecha)) {
-        return " 🍔 STACKER DAY 🍔"
-    } else return ""
-
-    
-}
-
-
-async function mostrarAsignacionesPorDia() {
-    if (!finished) {
+    if (!finished){
         try {
-            const asignacionesPorFecha = {}; // Objeto para almacenar las asignaciones agrupadas por fecha
-
-            const promesas = (await colaboradores).map(async (empleado) => {
+            (await colaboradores).forEach(async (empleado)  => {
                 const legajo = empleado.legajo;
                 const nombre = empleado.nombre;
                 const asignaciones = await fetchAsignacion(legajo);
-                const asignacionesData = JSON.parse(asignaciones);
-
-                if (asignacionesData && asignacionesData.asignaciones && asignacionesData.asignaciones.length > 0) {
-                    asignacionesData.asignaciones.forEach(asignacion => {
-                        const fecha = asignacion.fecha;
-                        if (!asignacionesPorFecha[fecha]) {
-                            asignacionesPorFecha[fecha] = [];
-                        }
-                        asignacionesPorFecha[fecha].push({ nombre, asignacion });
-                    });
-                }
+                mostrarAsignacionEnPagina(nombre, asignaciones);
             });
-
-            await Promise.all(promesas);
-
-            const contenedor = document.getElementById('asignaciones-container');
-            contenedor.innerHTML = ''; // Limpiar el contenedor antes de agregar las tablas
-
-            // Ordenar las fechas
-            const fechasOrdenadas = Object.keys(asignacionesPorFecha).sort((a, b) => {
-                const fechaA = new Date(a.split(' ')[1]);
-                const fechaB = new Date(b.split(' ')[1]);
-                return fechaA - fechaB;
-            });
-
-            // Crear tabla para cada fecha ordenada
-            fechasOrdenadas.forEach(fecha => {
-                const tabla = document.createElement('table');
-                tabla.classList.add('asignaciones-table');
-
-                const fechaElemento = document.createElement('h5');
-                fechaElemento.textContent = fecha + fechaEspecial(fecha);
-                contenedor.appendChild(fechaElemento);
-
-                const encabezado = tabla.createTHead();
-                const filaEncabezado = encabezado.insertRow();
-                const encabezados = ['Nombre', 'Hora de entrada', 'Hora de salida'];
-                encabezados.forEach(encabezado => {
-                    const th = document.createElement('th');
-                    th.textContent = encabezado;
-                    filaEncabezado.appendChild(th);
-                });
-
-                const cuerpo = tabla.createTBody();
-
-                asignacionesPorFecha[fecha].sort((a, b) => {
-                    return a.asignacion.horaEntrada.localeCompare(b.asignacion.horaEntrada);
-                });
-
-                asignacionesPorFecha[fecha].forEach(asignacion => {
-                    const fila = cuerpo.insertRow();
-                    fila.insertCell().textContent = asignacion.nombre;
-                    fila.insertCell().textContent = asignacion.asignacion.horaEntrada;
-                    fila.insertCell().textContent = asignacion.asignacion.horaSalida;
-                });
-
-                contenedor.appendChild(tabla);
-            });
-            finished = !finished
-
         } catch (error) {
             console.error('Error al mostrar las asignaciones:', error);
         }
     } else {
         alert("Las asignaciones ya fueron cargadas. Pulsa Aceptar para recargar la página");    
-        location.reload();
+        location.reload();    
     }
-}
-async function mostrarAsignaciones() {
-    if (!finished){
-    try {
-        (await colaboradores).forEach(async (empleado)  => {
-            const legajo = empleado.legajo;
-            const nombre = empleado.nombre;
-            const asignaciones = await fetchAsignacion(legajo); // Esperar a que se resuelva la promesa
-            mostrarAsignacionEnPagina( nombre, asignaciones);
-        })
-    } catch (error) {
-        console.error('Error al mostrar las asignaciones:', error);
-   }} else {
-    alert("Las asignaciones ya fueron cargadas. Pulsa Aceptar para recargar la página");    
-    location.reload();    
-    }
-   finished = !finished
+    finished = !finished;
 }
 
-function mostrarAsignacionEnPagina( nombre, asignacionesJSON) {
+function mostrarAsignacionEnPagina(nombre, asignacionesJSON) {
     const contenedor = document.getElementById('asignaciones-container');
     const empleadoDiv = document.createElement('div');
     const legajoTitulo = document.createElement('h4');
     legajoTitulo.textContent = `${nombre}`;
     empleadoDiv.appendChild(legajoTitulo);
 
-    // Convertir la cadena JSON de asignaciones en un objeto JavaScript
     const asignaciones = JSON.parse(asignacionesJSON);
 
-    // Verificar si hay asignaciones disponibles
     if (asignaciones && asignaciones.asignaciones && asignaciones.asignaciones.length > 0) {
-        // Crear tabla
         const tabla = document.createElement('table');
         tabla.classList.add('asignaciones-table');
 
-        // Encabezado de la tabla
         const encabezado = tabla.createTHead();
         const filaEncabezado = encabezado.insertRow();
         const encabezados = ['Fecha', 'Hora de entrada', 'Hora de salida'];
@@ -209,19 +92,16 @@ function mostrarAsignacionEnPagina( nombre, asignacionesJSON) {
             filaEncabezado.appendChild(th);
         });
 
-        // Cuerpo de la tabla
         const cuerpo = tabla.createTBody();
         asignaciones.asignaciones.forEach(asignacion => {
             const fila = cuerpo.insertRow();
             fila.insertCell().textContent = asignacion.fecha;
             fila.insertCell().textContent = asignacion.horaEntrada;
             fila.insertCell().textContent = asignacion.horaSalida;
-            //fila.insertCell().textContent = asignacion.tienda;
         });
 
         empleadoDiv.appendChild(tabla);
     } else {
-        // Si no hay asignaciones disponibles, mostrar un mensaje
         const errorMensaje = document.createElement('p');
         errorMensaje.textContent = 'No hay asignaciones disponibles.';
         empleadoDiv.appendChild(errorMensaje);
@@ -229,9 +109,6 @@ function mostrarAsignacionEnPagina( nombre, asignacionesJSON) {
 
     contenedor.appendChild(empleadoDiv);
 }
-
-
-
 
 const volverAlInicio = () => window.location.href = "index.html";
 const irASolicitarHorario = () => window.location.href = "pedir_horario.html";
